@@ -9,5 +9,5 @@ keywords = ["core", "audio", "unit", "osx", "ios"]
 readme = "README.md"
 
 [dependencies]
-libc = "*"
+libc = "0.2.1"
 
