@@ -1,10 +1,6 @@
-#![allow(missing_copy_implementations)]
+#![cfg(any(target_os = "macos", target_oso = "ios"))]
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
-#![allow(raw_pointer_derive)]
 
-extern crate libc;
-
-pub mod audio_unit;
-
+include!(concat!(env!("OUT_DIR"), "/coreaudio.rs"));
