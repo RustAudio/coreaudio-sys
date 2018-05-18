@@ -1,29 +1,64 @@
 extern crate bindgen;
 
+fn osx_version() -> Result<String, std::io::Error> {
+    use std::process::Command;
+
+    let output = Command::new("defaults")
+        .arg("read")
+        .arg("loginwindow")
+        .arg("SystemVersionStampAsString")
+        .output()?
+        .stdout;
+    let version_str = std::str::from_utf8(&output).expect("invalid output from `defaults`");
+    let version = version_str.trim_right();
+
+    Ok(version.to_owned())
+}
+
+fn parse_version(version: &str) -> Option<i32> {
+    version
+        .split(".")
+        .skip(1)
+        .next()
+        .and_then(|m| m.parse::<i32>().ok())
+}
+
 fn frameworks_path() -> Result<String, std::io::Error> {
+    // For 10.13 and higher:
+    //
     // While macOS has its system frameworks located at "/System/Library/Frameworks"
     // for actually linking against them (especially for cross-compilation) once
     // has to refer to the frameworks as found within "Xcode.app/Contents/Developer/…".
 
-    use std::process::Command;
+    if osx_version()
+        .and_then(|version| Ok(parse_version(&version).map(|v| v >= 13).unwrap_or(false)))
+        .unwrap_or(false)
+    {
+        use std::process::Command;
 
-    let output = Command::new("xcode-select").arg("-p").output()?.stdout;
-    let prefix_str = std::str::from_utf8(&output).expect("invalid output from `xcode-select`");
-    let prefix = prefix_str.trim_right();
+        let output = Command::new("xcode-select").arg("-p").output()?.stdout;
+        let prefix_str = std::str::from_utf8(&output).expect("invalid output from `xcode-select`");
+        let prefix = prefix_str.trim_right();
 
-    let platform = if cfg!(target_os = "macos") {
-        "MacOSX"
-    } else if cfg!(target_os = "ios") {
-        "iPhoneOS"
+        let platform = if cfg!(target_os = "macos") {
+            "MacOSX"
+        } else if cfg!(target_os = "ios") {
+            "iPhoneOS"
+        } else {
+            unreachable!();
+        };
+
+        let infix = format!(
+            "Platforms/{}.platform/Developer/SDKs/{}.sdk",
+            platform, platform
+        );
+        let suffix = "System/Library/Frameworks";
+        let directory = format!("{}/{}/{}", prefix, infix, suffix);
+
+        Ok(directory)
     } else {
-        unreachable!();
-    };
-
-    let infix = format!("Platforms/{}.platform/Developer/SDKs/{}.sdk", platform, platform);
-    let suffix = "System/Library/Frameworks";
-    let directory = format!("{}/{}/{}", prefix, infix, suffix);
-
-    Ok(directory)
+        Ok("/System/Library/Frameworks".to_string())
+    }
 }
 
 fn build(frameworks_path: &str) {
@@ -38,7 +73,7 @@ fn build(frameworks_path: &str) {
 
     use std::env;
     use std::path::PathBuf;
-    
+
     let mut frameworks = vec![];
     let mut headers = vec![];
 
@@ -106,7 +141,9 @@ fn build(frameworks_path: &str) {
         .expect("unable to generate bindings");
 
     // Write them to the crate root.
-    bindings.write_to_file(out_dir.join("coreaudio.rs")).expect("could not write bindings");
+    bindings
+        .write_to_file(out_dir.join("coreaudio.rs"))
+        .expect("could not write bindings");
 }
 
 #[cfg(any(target_os = "macos", target_os = "ios"))]
