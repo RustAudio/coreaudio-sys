@@ -48,10 +48,12 @@ fn frameworks_path() -> Result<String, std::io::Error> {
             unreachable!();
         };
 
-        let infix = format!(
-            "Platforms/{}.platform/Developer/SDKs/{}.sdk",
-            platform, platform
-        );
+        let infix = if prefix == "/Library/Developer/CommandLineTools" {
+            format!("SDKs/{}.sdk", platform)
+        } else {
+            format!("Platforms/{}.platform/Developer/SDKs/{}.sdk", platform, platform)
+        };
+
         let suffix = "System/Library/Frameworks";
         let directory = format!("{}/{}/{}", prefix, infix, suffix);
 
