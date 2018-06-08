@@ -139,6 +139,7 @@ fn build(frameworks_path: &str) {
     let bindings = builder
         .trust_clang_mangling(false)
         .derive_default(true)
+        .rustfmt_bindings(false)
         .generate()
         .expect("unable to generate bindings");
 
