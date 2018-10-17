@@ -51,7 +51,10 @@ fn frameworks_path() -> Result<String, std::io::Error> {
         let infix = if prefix == "/Library/Developer/CommandLineTools" {
             format!("SDKs/{}.sdk", platform)
         } else {
-            format!("Platforms/{}.platform/Developer/SDKs/{}.sdk", platform, platform)
+            format!(
+                "Platforms/{}.platform/Developer/SDKs/{}.sdk",
+                platform, platform
+            )
         };
 
         let suffix = "System/Library/Frameworks";
@@ -131,8 +134,8 @@ fn build(frameworks_path: &str) {
 
     // Link to all frameworks.
     for relative_path in frameworks {
-        let absolute_path = format!("{}/{}", frameworks_path, relative_path);
-        builder = builder.link_framework(absolute_path);
+        let link_instruction = format!("#[link = \"{}/{}\"]", frameworks_path, relative_path);
+        builder = builder.raw_line(link_instruction);
     }
 
     // Generate the bindings.
