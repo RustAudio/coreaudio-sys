@@ -9,6 +9,7 @@ readme = "README.md"
 homepage = "https://github.com/RustAudio/coreaudio-sys"
 repository = "https://github.com/RustAudio/coreaudio-sys.git"
 build = "build.rs"
+edition = "2018"
 
 [build-dependencies]
 bindgen = "0.42"
