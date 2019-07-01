@@ -30,6 +30,11 @@ fn frameworks_path() -> Result<String, std::io::Error> {
     // for actually linking against them (especially for cross-compilation) once
     // has to refer to the frameworks as found within "Xcode.app/Contents/Developer/…".
 
+    // Use environment variable if set
+    if let Ok(path) = std::env::var("COREAUDIO_FRAMEWORKS_PATH") {
+        return Ok(path)
+    }
+
     if osx_version()
         .and_then(|version| Ok(parse_version(&version).map(|v| v >= 13).unwrap_or(false)))
         .unwrap_or(false)
@@ -40,9 +45,10 @@ fn frameworks_path() -> Result<String, std::io::Error> {
         let prefix_str = std::str::from_utf8(&output).expect("invalid output from `xcode-select`");
         let prefix = prefix_str.trim_right();
 
-        let platform = if cfg!(target_os = "macos") {
+        let target = std::env::var("TARGET").unwrap();
+        let platform = if target.contains("apple-darwin") {
             "MacOSX"
-        } else if cfg!(target_os = "ios") {
+        } else if target.contains("apple-ios") {
             "iPhoneOS"
         } else {
             unreachable!();
@@ -111,11 +117,13 @@ fn build(frameworks_path: &str) {
         headers.push("OpenAL.framework/Headers/alc.h");
     }
 
-    #[cfg(all(feature = "core_midi", target_os = "macos"))]
+    #[cfg(all(feature = "core_midi"))]
     {
-        println!("cargo:rustc-link-lib=framework=CoreMIDI");
-        frameworks.push("CoreMIDI");
-        headers.push("CoreMIDI.framework/Headers/CoreMIDI.h");
+        if std::env::var("TARGET").unwrap().contains("apple-darwin") {
+            println!("cargo:rustc-link-lib=framework=CoreMIDI");
+            frameworks.push("CoreMIDI");
+            headers.push("CoreMIDI.framework/Headers/CoreMIDI.h");
+        }
     }
 
     // Get the cargo out directory.
@@ -139,10 +147,16 @@ fn build(frameworks_path: &str) {
     }
 
     // Generate the bindings.
-    let bindings = builder
+    builder = builder
         .trust_clang_mangling(false)
         .derive_default(true)
-        .rustfmt_bindings(false)
+        .rustfmt_bindings(false);
+
+    if let Ok(cflags) = std::env::var("COREAUDIO_CFLAGS") {
+        builder = builder.clang_args(cflags.split(" "));
+    }
+
+    let bindings = builder
         .generate()
         .expect("unable to generate bindings");
 
@@ -152,8 +166,12 @@ fn build(frameworks_path: &str) {
         .expect("could not write bindings");
 }
 
-#[cfg(any(target_os = "macos", target_os = "ios"))]
 fn main() {
+    let target = std::env::var("TARGET").unwrap();
+    if ! (target.contains("apple-darwin") || target.contains("apple-ios")) {
+        eprintln!("coreaudio-sys requires macos or ios target");
+    }
+
     if let Ok(directory) = frameworks_path() {
         build(&directory);
     } else {
@@ -161,7 +179,3 @@ fn main() {
     }
 }
 
-#[cfg(not(any(target_os = "macos", target_os = "ios")))]
-fn main() {
-    eprintln!("coreaudio-sys requires macos or ios target");
-}
