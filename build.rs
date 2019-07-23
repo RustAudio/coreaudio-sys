@@ -10,7 +10,7 @@ fn osx_version() -> Result<String, std::io::Error> {
         .output()?
         .stdout;
     let version_str = std::str::from_utf8(&output).expect("invalid output from `defaults`");
-    let version = version_str.trim_right();
+    let version = version_str.trim_end();
 
     Ok(version.to_owned())
 }
@@ -43,7 +43,7 @@ fn frameworks_path() -> Result<String, std::io::Error> {
 
         let output = Command::new("xcode-select").arg("-p").output()?.stdout;
         let prefix_str = std::str::from_utf8(&output).expect("invalid output from `xcode-select`");
-        let prefix = prefix_str.trim_right();
+        let prefix = prefix_str.trim_end();
 
         let target = std::env::var("TARGET").unwrap();
         let platform = if target.contains("apple-darwin") {
