@@ -1,7 +1,5 @@
 extern crate bindgen;
 
-const FRAMEWORKS_PATH: &'static str = "System/Library/Frameworks";
-
 fn sdk_path(target: &str) -> Result<String, std::io::Error> {
     // Use environment variable if set
     println!("cargo:rerun-if-env-changed=COREAUDIO_SDK_PATH");
@@ -44,33 +42,33 @@ fn build(sdk_path: &str, target: &str) {
     #[cfg(feature = "audio_toolbox")]
     {
         println!("cargo:rustc-link-lib=framework=AudioToolbox");
-        headers.push("AudioToolbox.framework/Headers/AudioToolbox.h");
+        headers.push("AudioToolbox/AudioToolbox.h");
     }
 
     #[cfg(feature = "audio_unit")]
     {
         println!("cargo:rustc-link-lib=framework=AudioUnit");
-        headers.push("AudioUnit.framework/Headers/AudioUnit.h");
+        headers.push("AudioUnit/AudioUnit.h");
     }
 
     #[cfg(feature = "core_audio")]
     {
         println!("cargo:rustc-link-lib=framework=CoreAudio");
-        headers.push("CoreAudio.framework/Headers/CoreAudio.h");
+        headers.push("CoreAudio/CoreAudio.h");
     }
 
     #[cfg(feature = "open_al")]
     {
         println!("cargo:rustc-link-lib=framework=OpenAL");
-        headers.push("OpenAL.framework/Headers/al.h");
-        headers.push("OpenAL.framework/Headers/alc.h");
+        headers.push("OpenAL/al.h");
+        headers.push("OpenAL/alc.h");
     }
 
     #[cfg(all(feature = "core_midi"))]
     {
         if target.contains("apple-darwin") {
             println!("cargo:rustc-link-lib=framework=CoreMIDI");
-            headers.push("CoreMIDI.framework/Headers/CoreMIDI.h");
+            headers.push("CoreMIDI/CoreMIDI.h");
         }
     }
 
@@ -83,11 +81,12 @@ fn build(sdk_path: &str, target: &str) {
 
     builder = builder.clang_args(&[&format!("--target={}", target), "-isysroot", sdk_path]);
 
-    // Add all headers.
-    for relative_path in headers {
-        let absolute_path = format!("{}/{}/{}", sdk_path, FRAMEWORKS_PATH, relative_path);
-        builder = builder.header(absolute_path);
-    }
+    let meta_header: Vec<_> = headers
+        .iter()
+        .map(|h| format!("#include <{}>\n", h))
+        .collect();
+
+    builder = builder.header_contents("coreaudio.h", &meta_header.concat());
 
     // Generate the bindings.
     builder = builder
