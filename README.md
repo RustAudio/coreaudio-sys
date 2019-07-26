@@ -10,18 +10,10 @@ Raw bindings to Apple's Core Audio API for macos and iOS generated using [rust-b
 
 When cross-compiling for MacOS on Linux there are two environment variables that are used to configure how `coreaudio-sys` finds the required headers and libraries. The following examples assume that you have OSXCross installed at `/build/osxcross`.
 
-#### `COREAUDIO_CFLAGS`
+#### `COREAUDIO_SDK_PATH`
 
-This allows you to add arbitrary flags to the `clang` call that is made when auto-generating the Rust bindings to coreaudio. This will need to be set to include some headers used by coreaudio:
-
-```bash
-export COREAUDIO_CFLAGS=-I/build/osxcross/target/SDK/MacOSX10.11.sdk/System/Library/Frameworks/Kernel.framework/Headers -I/build/osxcross/target/SDK/MacOSX10.11.sdk/usr/include
-```
-
-#### `COREAUDIO_FRAMEWORKS_PATH`
-
-This tell `coreaudio-sys` where to find the Frameworks path of the MacOS SDK:
+This tell `coreaudio-sys` where to find the MacOS SDK:
 
 ```bash
-export COREAUDIO_FRAMEWORKS_PATH=/build/osxcross/target/SDK/MacOSX10.11.sdk/System/Library/Frameworks
+export COREAUDIO_SDK_PATH=/build/osxcross/target/SDK/MacOSX10.11.sdk
 ```
