@@ -74,6 +74,7 @@ fn build(sdk_path: &str, target: &str) {
         }
     }
 
+    println!("cargo:rerun-if-env-changed=BINDGEN_EXTRA_CLANG_ARGS");
     // Get the cargo out directory.
     let out_dir = PathBuf::from(env::var("OUT_DIR").expect("env variable OUT_DIR not found"));
 
@@ -93,11 +94,6 @@ fn build(sdk_path: &str, target: &str) {
         .trust_clang_mangling(false)
         .derive_default(true)
         .rustfmt_bindings(false);
-
-    println!("cargo:rerun-if-env-changed=COREAUDIO_CFLAGS");
-    if let Ok(cflags) = std::env::var("COREAUDIO_CFLAGS") {
-        builder = builder.clang_args(cflags.split(" "));
-    }
 
     let bindings = builder.generate().expect("unable to generate bindings");
 
