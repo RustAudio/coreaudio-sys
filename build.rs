@@ -92,8 +92,7 @@ fn build(sdk_path: &str, target: &str) {
     // Generate the bindings.
     builder = builder
         .trust_clang_mangling(false)
-        .derive_default(true)
-        .rustfmt_bindings(false);
+        .derive_default(true);
 
     let bindings = builder.generate().expect("unable to generate bindings");
 
