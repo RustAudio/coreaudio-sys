@@ -105,12 +105,12 @@ fn build(sdk_path: &str, target: &str) {
 fn main() {
     let target = std::env::var("TARGET").unwrap();
     if !(target.contains("apple-darwin") || target.contains("apple-ios")) {
-        eprintln!("coreaudio-sys requires macos or ios target");
+        panic!("coreaudio-sys requires macos or ios target");
     }
 
     if let Ok(directory) = sdk_path(&target) {
         build(&directory, &target);
     } else {
-        eprintln!("coreaudio-sys could not find an appropriate SDK");
+        panic!("coreaudio-sys could not find an appropriate SDK");
     }
 }
