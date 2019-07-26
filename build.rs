@@ -32,7 +32,7 @@ fn frameworks_path() -> Result<String, std::io::Error> {
 
     // Use environment variable if set
     if let Ok(path) = std::env::var("COREAUDIO_FRAMEWORKS_PATH") {
-        return Ok(path)
+        return Ok(path);
     }
 
     if osx_version()
@@ -144,9 +144,7 @@ fn build(frameworks_path: &str) {
         builder = builder.clang_args(cflags.split(" "));
     }
 
-    let bindings = builder
-        .generate()
-        .expect("unable to generate bindings");
+    let bindings = builder.generate().expect("unable to generate bindings");
 
     // Write them to the crate root.
     bindings
@@ -156,7 +154,7 @@ fn build(frameworks_path: &str) {
 
 fn main() {
     let target = std::env::var("TARGET").unwrap();
-    if ! (target.contains("apple-darwin") || target.contains("apple-ios")) {
+    if !(target.contains("apple-darwin") || target.contains("apple-ios")) {
         eprintln!("coreaudio-sys requires macos or ios target");
     }
 
@@ -166,4 +164,3 @@ fn main() {
         eprintln!("coreaudio-sys could not find frameworks path");
     }
 }
-
