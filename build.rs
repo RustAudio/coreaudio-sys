@@ -85,34 +85,29 @@ fn build(frameworks_path: &str) {
     use std::env;
     use std::path::PathBuf;
 
-    let mut frameworks = vec![];
     let mut headers = vec![];
 
     #[cfg(feature = "audio_toolbox")]
     {
         println!("cargo:rustc-link-lib=framework=AudioToolbox");
-        frameworks.push("AudioToolbox");
         headers.push("AudioToolbox.framework/Headers/AudioToolbox.h");
     }
 
     #[cfg(feature = "audio_unit")]
     {
         println!("cargo:rustc-link-lib=framework=AudioUnit");
-        frameworks.push("AudioUnit");
         headers.push("AudioUnit.framework/Headers/AudioUnit.h");
     }
 
     #[cfg(feature = "core_audio")]
     {
         println!("cargo:rustc-link-lib=framework=CoreAudio");
-        frameworks.push("CoreAudio");
         headers.push("CoreAudio.framework/Headers/CoreAudio.h");
     }
 
     #[cfg(feature = "open_al")]
     {
         println!("cargo:rustc-link-lib=framework=OpenAL");
-        frameworks.push("OpenAL");
         headers.push("OpenAL.framework/Headers/al.h");
         headers.push("OpenAL.framework/Headers/alc.h");
     }
@@ -121,7 +116,6 @@ fn build(frameworks_path: &str) {
     {
         if std::env::var("TARGET").unwrap().contains("apple-darwin") {
             println!("cargo:rustc-link-lib=framework=CoreMIDI");
-            frameworks.push("CoreMIDI");
             headers.push("CoreMIDI.framework/Headers/CoreMIDI.h");
         }
     }
@@ -138,12 +132,6 @@ fn build(frameworks_path: &str) {
     for relative_path in headers {
         let absolute_path = format!("{}/{}", frameworks_path, relative_path);
         builder = builder.header(absolute_path);
-    }
-
-    // Link to all frameworks.
-    for relative_path in frameworks {
-        let link_instruction = format!("#[link = \"{}/{}\"]", frameworks_path, relative_path);
-        builder = builder.raw_line(link_instruction);
     }
 
     // Generate the bindings.
