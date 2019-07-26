@@ -11,6 +11,7 @@ os:
 before_script:
 - rustc --version
 - cargo --version
+- rustup component add rustfmt
 script:
 - cargo build --verbose
 - cargo test --verbose
