@@ -24,7 +24,7 @@ fn sdk_path(target: &str) -> Result<String, std::io::Error> {
     Ok(prefix_str.trim_end().to_string())
 }
 
-fn build(sdk_path: &str, target: &str) {
+fn build(sdk_path: Option<&str>, target: &str) {
     // Generate one large set of bindings for all frameworks.
     //
     // We do this rather than generating a module per framework as some frameworks depend on other
@@ -79,7 +79,11 @@ fn build(sdk_path: &str, target: &str) {
     // Begin building the bindgen params.
     let mut builder = bindgen::Builder::default();
 
-    builder = builder.clang_args(&[&format!("--target={}", target), "-isysroot", sdk_path]);
+    builder = builder.clang_args(&[&format!("--target={}", target)]);
+
+    if let Some(sdk_path) = sdk_path {
+        builder = builder.clang_args(&["-isysroot", sdk_path]);
+    }
 
     let meta_header: Vec<_> = headers
         .iter()
@@ -107,9 +111,6 @@ fn main() {
         panic!("coreaudio-sys requires macos or ios target");
     }
 
-    if let Ok(directory) = sdk_path(&target) {
-        build(&directory, &target);
-    } else {
-        panic!("coreaudio-sys could not find an appropriate SDK");
-    }
+    let directory = sdk_path(&target).ok();
+    build(directory.as_ref().map(String::as_ref), &target);
 }
