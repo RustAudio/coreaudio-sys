@@ -11,7 +11,7 @@ repository = "https://github.com/RustAudio/coreaudio-sys.git"
 build = "build.rs"
 
 [build-dependencies.bindgen]
-version = "0.50"
+version = "0.51"
 default-features = false
 
 [features]
