@@ -16,5 +16,5 @@ before_script:
 - if [ "$TRAVIS_OS_NAME" = linux ]; then rustup target add x86_64-apple-darwin; fi
 script:
 - if [ "$TRAVIS_OS_NAME" = linux ]; then curl -sL https://github.com/phracker/MacOSX-SDKs/releases/download/10.13/MacOSX10.13.sdk.tar.xz | tar -Jxf -; export COREAUDIO_SDK_PATH="$PWD/MacOSX10.13.sdk"; fi
-- cargo build --verbose --target=x86_64-apple-darwin
-- if [ "$TRAVIS_OS_NAME" = osx ]; then cargo test --verbose; fi
+- RUSTFMT=rustfmt cargo build --verbose --target=x86_64-apple-darwin
+- if [ "$TRAVIS_OS_NAME" = osx ]; then RUSTFMT=rustfmt cargo test --verbose; fi
