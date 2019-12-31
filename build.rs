@@ -54,7 +54,12 @@ fn build(sdk_path: Option<&str>, target: &str) {
     #[cfg(feature = "core_audio")]
     {
         println!("cargo:rustc-link-lib=framework=CoreAudio");
-        headers.push("CoreAudio/CoreAudio.h");
+
+        if target.contains("apple-ios") {
+            headers.push("CoreAudio/CoreAudioTypes.h");
+        } else {
+            headers.push("CoreAudio/CoreAudio.h");
+        }
     }
 
     #[cfg(feature = "open_al")]
@@ -79,7 +84,14 @@ fn build(sdk_path: Option<&str>, target: &str) {
     // Begin building the bindgen params.
     let mut builder = bindgen::Builder::default();
 
-    builder = builder.clang_args(&[&format!("--target={}", target)]);
+    if target == "aarch64-apple-ios" {
+        // See https://github.com/rust-lang/rust-bindgen/issues/1211
+        // Technically according to the llvm mailing list, the argument to clang here should be
+        // -arch arm64 but it looks cleaner to just change the target.
+        builder = builder.clang_args(&[&format!("--target={}", "arm64-apple-ios")]);
+    } else {
+        builder = builder.clang_args(&[&format!("--target={}", target)]);
+    }
 
     if let Some(sdk_path) = sdk_path {
         builder = builder.clang_args(&["-isysroot", sdk_path]);
