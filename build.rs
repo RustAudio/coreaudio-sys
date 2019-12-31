@@ -84,14 +84,16 @@ fn build(sdk_path: Option<&str>, target: &str) {
     // Begin building the bindgen params.
     let mut builder = bindgen::Builder::default();
 
-    if target == "aarch64-apple-ios" {
-        // See https://github.com/rust-lang/rust-bindgen/issues/1211
-        // Technically according to the llvm mailing list, the argument to clang here should be
-        // -arch arm64 but it looks cleaner to just change the target.
-        builder = builder.clang_args(&[&format!("--target={}", "arm64-apple-ios")]);
+    // See https://github.com/rust-lang/rust-bindgen/issues/1211
+    // Technically according to the llvm mailing list, the argument to clang here should be
+    // -arch arm64 but it looks cleaner to just change the target.
+    let target = if target == "aarch64-apple-ios" {
+        "arm64-apple-ios"
     } else {
-        builder = builder.clang_args(&[&format!("--target={}", target)]);
-    }
+        target
+    };
+
+    builder = builder.clang_args(&[&format!("--target={}", target)]);
 
     if let Some(sdk_path) = sdk_path {
         builder = builder.clang_args(&["-isysroot", sdk_path]);
@@ -105,9 +107,7 @@ fn build(sdk_path: Option<&str>, target: &str) {
     builder = builder.header_contents("coreaudio.h", &meta_header.concat());
 
     // Generate the bindings.
-    builder = builder
-        .trust_clang_mangling(false)
-        .derive_default(true);
+    builder = builder.trust_clang_mangling(false).derive_default(true);
 
     let bindings = builder.generate().expect("unable to generate bindings");
 
