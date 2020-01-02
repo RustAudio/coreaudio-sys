@@ -96,7 +96,18 @@ fn build(sdk_path: Option<&str>, target: &str) {
     builder = builder.clang_args(&[&format!("--target={}", target)]);
 
     if let Some(sdk_path) = sdk_path {
-        builder = builder.clang_args(&["-isysroot", sdk_path]);
+        builder = builder.clang_args(
+            &[
+            "-isysroot", sdk_path,
+            ]
+        );
+    }
+    if target.contains("apple-ios") {
+        builder = builder.clang_args(
+            &[
+            "-x", "objective-c",
+            ]
+        );
     }
 
     let meta_header: Vec<_> = headers
