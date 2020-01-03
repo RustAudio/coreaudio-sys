@@ -37,7 +37,7 @@ fn build(sdk_path: Option<&str>, target: &str) {
     use std::env;
     use std::path::PathBuf;
 
-    let mut headers = vec![];
+    let mut headers : Vec<&str> = vec![];
 
     #[cfg(feature = "audio_toolbox")]
     {
@@ -106,8 +106,13 @@ fn build(sdk_path: Option<&str>, target: &str) {
         builder = builder.clang_args(
             &[
             "-x", "objective-c",
+            "-fblocks",
             ]
         );
+        builder = builder.objc_extern_crate(true);
+        builder = builder.block_extern_crate(true);
+        builder = builder.rustfmt_bindings(true);
+        //builder = builder.raw_line("use objc::runtime::Object;");
     }
 
     let meta_header: Vec<_> = headers

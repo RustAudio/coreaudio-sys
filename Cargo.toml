@@ -10,8 +10,13 @@ homepage = "https://github.com/RustAudio/coreaudio-sys"
 repository = "https://github.com/RustAudio/coreaudio-sys.git"
 build = "build.rs"
 
+[target.'cfg(target_os = "ios")'.dependencies]
+objc = "0.2.7"
+block = "*"
+
 [build-dependencies.bindgen]
-version = "0.51"
+version = "0.52"
+#path = "../rust-bindgen/"
 default-features = false
 
 [features]
