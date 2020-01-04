@@ -112,7 +112,7 @@ fn build(sdk_path: Option<&str>, target: &str) {
         builder = builder.objc_extern_crate(true);
         builder = builder.block_extern_crate(true);
         builder = builder.rustfmt_bindings(true);
-        //builder = builder.raw_line("use objc::runtime::Object;");
+        builder = builder.blacklist_item("timezone");
     }
 
     let meta_header: Vec<_> = headers

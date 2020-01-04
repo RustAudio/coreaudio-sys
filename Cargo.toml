@@ -15,8 +15,9 @@ objc = "0.2.7"
 block = "*"
 
 [build-dependencies.bindgen]
-version = "0.52"
-#path = "../rust-bindgen/"
+#version = "0.52"
+git = "https://github.com/simlay/rust-bindgen.git"
+branch = "objc-generics-erasing"
 default-features = false
 
 [features]
