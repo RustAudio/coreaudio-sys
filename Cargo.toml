@@ -12,7 +12,7 @@ build = "build.rs"
 
 [target.'cfg(target_os = "ios")'.dependencies]
 objc = "0.2.7"
-block = "*"
+block = "0.1.6"
 
 [build-dependencies.bindgen]
 #version = "0.52"
