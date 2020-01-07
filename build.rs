@@ -110,6 +110,7 @@ fn build(sdk_path: Option<&str>, target: &str) {
             ]
         );
         builder = builder.objc_extern_crate(true);
+        builder = builder.generate_block(true);
         builder = builder.block_extern_crate(true);
         builder = builder.rustfmt_bindings(true);
         // time.h as has a variable called timezone that conflicts with some of the objective-c
