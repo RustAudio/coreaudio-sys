@@ -11,7 +11,12 @@ fn sdk_path(target: &str) -> Result<String, std::io::Error> {
 
     let sdk = if target.contains("apple-darwin") {
         "macosx"
-    } else if target.contains("apple-ios") {
+    } else if target == "x86_64-apple-ios" || target == "i386-apple-ios" {
+        "iphonesimulator"
+    } else if target == "aarch64-apple-ios"
+        || target == "armv7-apple-ios"
+        || target == "armv7s-apple-ios"
+    {
         "iphoneos"
     } else {
         unreachable!();
@@ -37,7 +42,7 @@ fn build(sdk_path: Option<&str>, target: &str) {
     use std::env;
     use std::path::PathBuf;
 
-    let mut headers : Vec<&str> = vec![];
+    let mut headers: Vec<&str> = vec![];
 
     #[cfg(feature = "audio_toolbox")]
     {
@@ -96,19 +101,10 @@ fn build(sdk_path: Option<&str>, target: &str) {
     builder = builder.clang_args(&[&format!("--target={}", target)]);
 
     if let Some(sdk_path) = sdk_path {
-        builder = builder.clang_args(
-            &[
-            "-isysroot", sdk_path,
-            ]
-        );
+        builder = builder.clang_args(&["-isysroot", sdk_path]);
     }
     if target.contains("apple-ios") {
-        builder = builder.clang_args(
-            &[
-            "-x", "objective-c",
-            "-fblocks",
-            ]
-        );
+        builder = builder.clang_args(&["-x", "objective-c", "-fblocks"]);
         builder = builder.objc_extern_crate(true);
         builder = builder.generate_block(true);
         builder = builder.block_extern_crate(true);
