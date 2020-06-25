@@ -37,7 +37,7 @@ fn build(sdk_path: Option<&str>, target: &str) {
     use std::env;
     use std::path::PathBuf;
 
-    let mut headers = vec![];
+    let mut headers: Vec<&'static str> = vec![];
 
     #[cfg(feature = "audio_toolbox")]
     {
