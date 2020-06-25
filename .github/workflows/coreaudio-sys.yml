@@ -37,6 +37,28 @@ jobs:
     - name: cargo doc - all features
       run: cargo doc --all-features --verbose
 
+  # Check that cross-compilation from linux is working.
+  # TODO: This is adapted from old travis file, should probably also:
+  # - Check more feature permutations.
+  # - Use more recent SDK? Looks like 10.13 is used atm.
+  # - Check iOS target?
+  linux-cross-compile:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install stable
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        override: true
+    - name: Add apple target
+      run: rustup target add x86_64-apple-darwin
+    - name: Download SDK
+      run: curl -sL https://github.com/phracker/MacOSX-SDKs/releases/download/10.13/MacOSX10.13.sdk.tar.xz | tar -Jxf -; export COREAUDIO_SDK_PATH="$PWD/MacOSX10.13.sdk"
+    - name: Cargo build
+      run: cargo build --verbose --target=x86_64-apple-darwin
+
   # Publish a new version when pushing to master.
   # Will succeed if the version has been updated, otherwise silently fails.
   cargo-publish:
