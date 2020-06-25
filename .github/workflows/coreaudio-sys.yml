@@ -2,7 +2,6 @@ name: coreaudio-sys
 on: [push, pull_request]
 jobs:
   # Run cargo test with default, no and all features.
-  # Also build the docs with all features to make sure docs.rs will work.
   macos-test:
     runs-on: macOS-latest
     steps:
@@ -21,6 +20,20 @@ jobs:
       run: cargo test --no-default-features --verbose
     - name: cargo test - all features
       run: cargo test --all-features --verbose
+
+  # Build the docs with all features to make sure docs.rs will work.
+  macos-docs:
+    runs-on: macOS-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install llvm and clang
+      run: brew install llvm
+    - name: Install stable
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        override: true
     - name: cargo doc - all features
       run: cargo doc --all-features --verbose
 
