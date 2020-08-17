@@ -52,7 +52,7 @@ fn build(sdk_path: Option<&str>, target: &str) {
 
     #[cfg(feature = "audio_unit")]
     {
-        println!("cargo:rustc-link-lib=framework=AudioUnit");
+        println!("cargo:rustc-link-lib=framework=AudioToolbox");
         headers.push("AudioUnit/AudioUnit.h");
     }
 
@@ -112,6 +112,7 @@ fn build(sdk_path: Option<&str>, target: &str) {
         // time.h as has a variable called timezone that conflicts with some of the objective-c
         // calls from NSCalendar.h in the Foundation framework. This removes that one variable.
         builder = builder.blacklist_item("timezone");
+        builder = builder.blacklist_item("objc_object");
     }
 
     let meta_header: Vec<_> = headers
