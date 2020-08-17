@@ -17,7 +17,7 @@ block = "0.1.6"
 [build-dependencies.bindgen]
 #version = "0.52"
 git = "https://github.com/simlay/rust-bindgen.git"
-branch = "categories-and-better-return-types"
+branch = "objc-category-inheritance"
 #git = "https://github.com/rust-lang/rust-bindgen.git"
 #revision = "ba409edf5d3a1acc6ac4dcb32d1e168cc3a2a41b"
 #path = "../../rust-bindgen/"
