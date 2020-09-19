@@ -113,6 +113,11 @@ fn build(sdk_path: Option<&str>, target: &str) {
         // calls from NSCalendar.h in the Foundation framework. This removes that one variable.
         builder = builder.blacklist_item("timezone");
         builder = builder.blacklist_item("objc_object");
+
+        // https://github.com/rust-lang/rust-bindgen/pull/1883 removed the Copy derive from
+        // objective-c class structs :/.
+        builder = builder.blacklist_item("os_workgroup_t");
+        builder = builder.raw_line("#[repr(C)] #[derive(Debug, Copy, Clone)] pub struct os_workgroup_s { _unused: [u8; 0], } pub type os_workgroup_t = *mut os_workgroup_s;");
     }
 
     let meta_header: Vec<_> = headers
