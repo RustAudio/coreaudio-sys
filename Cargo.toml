@@ -10,15 +10,8 @@ homepage = "https://github.com/RustAudio/coreaudio-sys"
 repository = "https://github.com/RustAudio/coreaudio-sys.git"
 build = "build.rs"
 
-[target.'cfg(target_os = "ios")'.dependencies]
-objc = "0.2.7"
-block = "0.1.6"
-
 [build-dependencies.bindgen]
-#version = "0.52"
-git = "https://github.com/rust-lang/rust-bindgen.git"
-revision = "ba409edf5d3a1acc6ac4dcb32d1e168cc3a2a41b"
-default-features = false
+version = "0.55"
 
 [features]
 default = ["audio_toolbox", "audio_unit", "core_audio", "open_al", "core_midi"]

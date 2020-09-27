@@ -54,6 +54,9 @@ fn build(sdk_path: Option<&str>, target: &str) {
     {
         println!("cargo:rustc-link-lib=framework=AudioUnit");
         headers.push("AudioUnit/AudioUnit.h");
+        if target.contains("apple-ios") {
+            println!("cargo:rustc-link-lib=framework=AudioToolbox");
+        }
     }
 
     #[cfg(feature = "core_audio")]
@@ -104,14 +107,10 @@ fn build(sdk_path: Option<&str>, target: &str) {
         builder = builder.clang_args(&["-isysroot", sdk_path]);
     }
     if target.contains("apple-ios") {
-        builder = builder.clang_args(&["-x", "objective-c", "-fblocks"]);
-        builder = builder.objc_extern_crate(true);
-        builder = builder.generate_block(true);
-        builder = builder.block_extern_crate(true);
-        builder = builder.rustfmt_bindings(true);
         // time.h as has a variable called timezone that conflicts with some of the objective-c
         // calls from NSCalendar.h in the Foundation framework. This removes that one variable.
         builder = builder.blacklist_item("timezone");
+        builder = builder.blacklist_item("objc_object");
     }
 
     let meta_header: Vec<_> = headers
