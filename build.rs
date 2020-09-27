@@ -42,7 +42,7 @@ fn build(sdk_path: Option<&str>, target: &str) {
     use std::env;
     use std::path::PathBuf;
 
-    let mut headers: Vec<&str> = vec![];
+    let mut headers: Vec<&'static str> = vec![];
 
     #[cfg(feature = "audio_toolbox")]
     {
@@ -54,9 +54,6 @@ fn build(sdk_path: Option<&str>, target: &str) {
     {
         println!("cargo:rustc-link-lib=framework=AudioToolbox");
         headers.push("AudioUnit/AudioUnit.h");
-        if target.contains("apple-ios") {
-            println!("cargo:rustc-link-lib=framework=AudioToolbox");
-        }
     }
 
     #[cfg(feature = "core_audio")]
@@ -100,6 +97,7 @@ fn build(sdk_path: Option<&str>, target: &str) {
     } else {
         target
     };
+    builder = builder.size_t_is_usize(true);
 
     builder = builder.clang_args(&[&format!("--target={}", target)]);
 
