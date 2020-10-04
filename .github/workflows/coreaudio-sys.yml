@@ -21,6 +21,11 @@ jobs:
     - name: cargo test - all features
       run: cargo test --all-features --verbose
 
+    - name: add ios targets
+      run: rustup target add aarch64-apple-ios x86_64-apple-ios
+    - name: Build ios targets
+      run: for i in aarch64-apple-ios x86_64-apple-ios; do cargo build --verbose --target=$i; done
+
   # Build the docs with all features to make sure docs.rs will work.
   macos-docs:
     runs-on: macOS-latest
