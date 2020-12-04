@@ -94,6 +94,8 @@ fn build(sdk_path: Option<&str>, target: &str) {
     // -arch arm64 but it looks cleaner to just change the target.
     let target = if target == "aarch64-apple-ios" {
         "arm64-apple-ios"
+    } else if target == "aarch64-apple-darwin" {
+        "arm64-apple-darwin"
     } else {
         target
     };
