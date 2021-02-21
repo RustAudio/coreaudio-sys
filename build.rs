@@ -44,16 +44,16 @@ fn build(sdk_path: Option<&str>, target: &str) {
 
     let mut headers: Vec<&'static str> = vec![];
 
+    #[cfg(feature = "audio_unit")]
+    {
+        println!("cargo:rustc-link-lib=framework=AudioUnit");
+        headers.push("AudioUnit/AudioUnit.h");
+    }
+
     #[cfg(feature = "audio_toolbox")]
     {
         println!("cargo:rustc-link-lib=framework=AudioToolbox");
         headers.push("AudioToolbox/AudioToolbox.h");
-    }
-
-    #[cfg(feature = "audio_unit")]
-    {
-        println!("cargo:rustc-link-lib=framework=AudioToolbox");
-        headers.push("AudioUnit/AudioUnit.h");
     }
 
     #[cfg(feature = "core_audio")]
