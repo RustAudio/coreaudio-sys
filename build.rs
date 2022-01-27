@@ -11,7 +11,10 @@ fn sdk_path(target: &str) -> Result<String, std::io::Error> {
 
     let sdk = if target.contains("apple-darwin") {
         "macosx"
-    } else if target == "x86_64-apple-ios" || target == "i386-apple-ios" {
+    } else if target == "x86_64-apple-ios"
+        || target == "i386-apple-ios"
+        || target == "aarch64-apple-ios-sim"
+    {
         "iphonesimulator"
     } else if target == "aarch64-apple-ios"
         || target == "armv7-apple-ios"
