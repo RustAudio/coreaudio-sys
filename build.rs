@@ -47,16 +47,32 @@ fn build(sdk_path: Option<&str>, target: &str) {
 
     let mut headers: Vec<&'static str> = vec![];
 
+    #[cfg(feature = "audio_unit")]
+    {
+        // Since iOS 10.0 and macOS 10.12, all the functionality in AudioUnit
+        // moved to AudioToolbox, and the AudioUnit headers have been simple
+        // wrappers ever since.
+        if target.contains("apple-ios") {
+            // On iOS, the AudioUnit framework does not have (and never had) an
+            // actual dylib to link to, it is just a few header files.
+            // The AudioToolbox framework contains the symbols instead.
+            println!("cargo:rustc-link-lib=framework=AudioToolbox");
+        } else {
+            // On macOS, the symbols are present in the AudioToolbox framework,
+            // but only on macOS 10.12 and above.
+            //
+            // However, unlike on iOS, the AudioUnit framework on macOS
+            // contains a dylib with the desired symbols, that we can link to
+            // (in later versions just re-exports from AudioToolbox).
+            println!("cargo:rustc-link-lib=framework=AudioUnit");
+        }
+        headers.push("AudioUnit/AudioUnit.h");
+    }
+
     #[cfg(feature = "audio_toolbox")]
     {
         println!("cargo:rustc-link-lib=framework=AudioToolbox");
         headers.push("AudioToolbox/AudioToolbox.h");
-    }
-
-    #[cfg(feature = "audio_unit")]
-    {
-        println!("cargo:rustc-link-lib=framework=AudioToolbox");
-        headers.push("AudioUnit/AudioUnit.h");
     }
 
     #[cfg(feature = "core_audio")]

@@ -4,6 +4,9 @@ jobs:
   # Run cargo test with default, no and all features.
   macos-test:
     runs-on: macOS-latest
+    strategy:
+      matrix:
+        toolchain: [stable, nightly]
     steps:
     - uses: actions/checkout@v2
     - name: Install llvm and clang
@@ -12,7 +15,7 @@ jobs:
       uses: actions-rs/toolchain@v1
       with:
         profile: minimal
-        toolchain: stable
+        toolchain: ${{ matrix.toolchain }}
         override: true
     - name: cargo test
       run: cargo test --verbose
