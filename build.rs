@@ -125,11 +125,24 @@ fn build(sdk_path: Option<&str>, target: &str) {
     if let Some(sdk_path) = sdk_path {
         builder = builder.clang_args(&["-isysroot", sdk_path]);
     }
-    if target.contains("apple-ios") {
+    #[cfg(feature = "objc")]
+    {
         // time.h as has a variable called timezone that conflicts with some of the objective-c
         // calls from NSCalendar.h in the Foundation framework. This removes that one variable.
-        builder = builder.blacklist_item("timezone");
-        builder = builder.blacklist_item("objc_object");
+        builder = builder.blocklist_item("timezone");
+        // fails to derive Copy
+        builder = builder.blocklist_item("objc_object");
+        // fails to derive Copy
+        builder = builder.blocklist_item("AudioUnitRenderContext");
+
+        builder = builder.clang_args(&["-x", "objective-c"]);
+        builder = builder.objc_extern_crate(true);
+    }
+    #[cfg(feature = "block")]
+    {
+        builder = builder.clang_args(&["-fblocks"]);
+        builder = builder.generate_block(true);
+        builder = builder.block_extern_crate(true);
     }
 
     let meta_header: Vec<_> = headers
