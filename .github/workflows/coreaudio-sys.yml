@@ -8,7 +8,7 @@ jobs:
       matrix:
         toolchain: [stable, nightly]
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Install llvm and clang
       run: brew install llvm
     - name: Install stable
@@ -31,7 +31,7 @@ jobs:
         toolchain: [stable, nightly]
         target: [aarch64-apple-ios, x86_64-apple-ios, aarch64-apple-ios-sim]
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Install stable rust toolchain
       uses: actions-rs/toolchain@v1
       with:
@@ -54,7 +54,7 @@ jobs:
   macos-docs:
     runs-on: macOS-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Install llvm and clang
       run: brew install llvm
     - name: Install stable
@@ -74,7 +74,7 @@ jobs:
       CRATESIO_TOKEN: ${{ secrets.CRATESIO_TOKEN }}
     runs-on: macOS-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Install llvm and clang
       run: brew install llvm
     - name: Install stable
