@@ -40,7 +40,7 @@ jobs:
         override: true
 
     - name: Install LLVM and Clang
-      uses: KyleMayes/install-llvm-action@v1.8.0
+      uses: KyleMayes/install-llvm-action@v1.8.3
       with:
         version: "13.0"
 
