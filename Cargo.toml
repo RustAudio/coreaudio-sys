@@ -1,6 +1,6 @@
 [package]
 name = "coreaudio-sys"
-version = "0.2.13"
+version = "0.2.14"
 authors = ["Mitchell Nordine <mitchell.nordine@gmail.com>"]
 description = "Bindings for Apple's CoreAudio frameworks generated via rust-bindgen"
 license = "MIT"
@@ -20,6 +20,7 @@ default = ["audio_toolbox", "audio_unit", "core_audio", "open_al", "core_midi"]
 audio_toolbox = []
 audio_unit = []
 core_audio = []
+io_kit_audio = []
 open_al = []
 core_midi = []
 
