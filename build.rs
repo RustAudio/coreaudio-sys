@@ -83,6 +83,7 @@ fn build(sdk_path: Option<&str>, target: &str) {
             headers.push("CoreAudio/CoreAudioTypes.h");
         } else {
             headers.push("CoreAudio/CoreAudio.h");
+            headers.push("CoreAudio/AudioServerPlugIn.h");
         }
     }
 
