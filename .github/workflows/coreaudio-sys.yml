@@ -9,8 +9,10 @@ jobs:
         toolchain: [stable, nightly]
     steps:
     - uses: actions/checkout@v4
-    - name: Install llvm and clang
-      run: brew install llvm
+    - name: Install LLVM and Clang
+      uses: KyleMayes/install-llvm-action@v2.0.1
+      with:
+        version: "15.0"
     - name: Install stable
       uses: actions-rs/toolchain@v1
       with:
@@ -25,7 +27,7 @@ jobs:
       run: cargo test --all-features --verbose
 
   ios-check:
-    runs-on: macOS-latest
+    runs-on: macOS-14
     strategy:
       matrix:
         toolchain: [stable, nightly]
@@ -42,7 +44,7 @@ jobs:
     - name: Install LLVM and Clang
       uses: KyleMayes/install-llvm-action@v2.0.1
       with:
-        version: "13.0"
+        version: "15.0"
 
     - name: add ios targets
       run: rustup target add ${{matrix.target}}
@@ -55,8 +57,10 @@ jobs:
     runs-on: macOS-latest
     steps:
     - uses: actions/checkout@v4
-    - name: Install llvm and clang
-      run: brew install llvm
+    - name: Install LLVM and Clang
+      uses: KyleMayes/install-llvm-action@v2.0.1
+      with:
+        version: "15.0"
     - name: Install stable
       uses: actions-rs/toolchain@v1
       with:
@@ -75,8 +79,10 @@ jobs:
     runs-on: macOS-latest
     steps:
     - uses: actions/checkout@v4
-    - name: Install llvm and clang
-      run: brew install llvm
+    - name: Install LLVM and Clang
+      uses: KyleMayes/install-llvm-action@v2.0.1
+      with:
+        version: "15.0"
     - name: Install stable
       uses: actions-rs/toolchain@v1
       with:
