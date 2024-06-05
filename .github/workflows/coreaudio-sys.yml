@@ -51,19 +51,19 @@ jobs:
     runs-on: macOS-14
     strategy:
       matrix:
-        toolchain: [stable, nightly]
         target: [aarch64-apple-visionos, aarch64-apple-visionos-sim]
     steps:
     - uses: actions/checkout@v4
-      with:
-        run: rustup install nightly --profile minimal
+
+    - name: Install rust nightly
+      run: rustup install nightly --profile minimal
 
     - name: Install LLVM and Clang
       uses: KyleMayes/install-llvm-action@v2.0.3
       with:
         # this is LLVM version that added support for visionOS
         # https://github.com/llvm/llvm-project/pull/77707
-        # version: "18.1.0" 
+        # version: "18.1.0" # no apple build yet
         version: "17.0.6" 
 
     - name: add visionos targets
