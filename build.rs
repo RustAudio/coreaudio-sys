@@ -22,11 +22,9 @@ fn sdk_path(target: &str) -> Result<String, std::io::Error> {
     {
         "iphoneos"
     } else if target == "aarch64-apple-visionos" {
-        // "xros"
-        "iphoneos" //xros doesn't have the AudioUnit header, but ios does
+        "xros"
     } else if target == "aarch64-apple-visionos-sim" {
-        // "xrsimulator"
-        "iphonesimulator" //xros doesn't have the AudioUnit header, but ios does
+        "xrsimulator"
     } else {
         unreachable!();
     };
@@ -81,10 +79,8 @@ fn build(sdk_path: Option<&str>, target: &str) {
 
     #[cfg(feature = "audio_toolbox")]
     {
-        if !target.contains("apple-visionos") {
-            println!("cargo:rustc-link-lib=framework=AudioToolbox");
-            headers.push("AudioToolbox/AudioToolbox.h");
-        }
+        println!("cargo:rustc-link-lib=framework=AudioToolbox");
+        headers.push("AudioToolbox/AudioToolbox.h");
     }
 
     #[cfg(feature = "core_audio")]
@@ -170,7 +166,23 @@ fn build(sdk_path: Option<&str>, target: &str) {
         .map(|h| format!("#include <{}>\n", h))
         .collect();
 
-    builder = builder.header_contents("coreaudio.h", &meta_header.concat());
+    
+    let fixes = if target.contains("apple-visionos") {
+        vec![
+            // /Applications/Xcode.app/Contents/Developer/Platforms/XROS.platform/Developer/SDKs/XROS1.1.sdk/System/Library/Frameworks/AudioToolbox.framework/Headers/AudioToolbox.h:43:11: fatal error: 'AudioToolbox/AudioFileComponent.h' file not found
+            "#define TARGET_OS_IPHONE true\n",
+            // https://github.com/phracker/MacOSX-SDKs/blob/master/MacOSX10.13.sdk/usr/include/MacTypes.h#L289
+            // /Applications/Xcode.app/Contents/Developer/Platforms/XROS.platform/Developer/SDKs/XROS1.1.sdk/System/Library/Frameworks/CoreMIDI.framework/Headers/MIDIServices.h:1633:8: error: unknown type name 'ItemCount'
+            "typedef unsigned long ItemCount;\n",
+            "typedef unsigned long ByteCount;\n"
+        ]
+    }else {
+        vec![""]
+    };
+
+    let contents = format!("{}{}", fixes.concat(), meta_header.concat());
+
+    builder = builder.header_contents("coreaudio.h", &contents);
 
     // Generate the bindings.
     builder = builder.trust_clang_mangling(false).derive_default(true);
