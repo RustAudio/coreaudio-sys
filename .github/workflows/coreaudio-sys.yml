@@ -56,8 +56,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        run:
-          rustup install nightly --profile minimal
+        run: rustup install nightly --profile minimal
 
     - name: Install LLVM and Clang
       uses: KyleMayes/install-llvm-action@v2.0.3
@@ -67,11 +66,11 @@ jobs:
         # version: "18.1.0" 
         version: "17.0.6" 
 
-    # - name: add visionos targets
-    #   run: rustup target add ${{matrix.target}}
+    - name: add visionos targets
+      run: rustup target add ${{matrix.target}}
 
     - name: Build for visionOS target ${{matrix.target}}
-      run: cargo +nightly build -Zbuild-std,panic=abort --verbose --target=${{matrix.target}}
+      run: cargo +nightly build -Zbuild-std --verbose --target=${{matrix.target}}
 
   # Build the docs with all features to make sure docs.rs will work.
   macos-docs:
