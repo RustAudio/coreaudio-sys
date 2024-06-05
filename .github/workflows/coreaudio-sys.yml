@@ -64,7 +64,7 @@ jobs:
       with:
         # this is LLVM version that added support for visionOS
         # https://github.com/llvm/llvm-project/pull/77707
-        version: "18.1.0" 
+        version: "18.1.6" 
 
     - name: add visionos targets
       run: rustup target add ${{matrix.target}}
