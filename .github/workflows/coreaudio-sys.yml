@@ -55,8 +55,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Install rust nightly
-      run: rustup install nightly --profile minimal
+    # - name: Install rust nightly
+    #   run: rustup install nightly --profile minimal
+    - uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: nightly
 
     - name: Install LLVM and Clang
       uses: KyleMayes/install-llvm-action@v2.0.3
