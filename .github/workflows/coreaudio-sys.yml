@@ -73,8 +73,9 @@ jobs:
     #     # version: "18.1.0" # no apple build yet
     #     version: "17.0.6" 
     
-    # - name: Install Xcode Command Line Tools
-    #   run: xcode-select --install
+    - name: Install Xcode Command Line Tools
+      run: sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
+      # run: xcode-select --install
 
     # - name: add visionos targets
     #   run: rustup target add ${{matrix.target}}
