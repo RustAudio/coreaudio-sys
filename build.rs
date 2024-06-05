@@ -33,6 +33,9 @@ fn sdk_path(target: &str) -> Result<String, std::io::Error> {
         .output()?
         .stdout;
     let prefix_str = std::str::from_utf8(&output).expect("invalid output from `xcrun`");
+
+    println!("COREAUDIO_SDK_PATH - {prefix_str}");
+
     Ok(prefix_str.trim_end().to_string())
 }
 

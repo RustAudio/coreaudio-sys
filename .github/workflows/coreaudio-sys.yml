@@ -61,11 +61,11 @@ jobs:
         toolchain: nightly
         components: rust-src
 
-    - name: Install Xcode Command Line Tools
-      run: sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
+    # - name: Install Xcode Command Line Tools
+    #   run: sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
 
-    - name: set COREAUDIO_SDK_PATH
-      run: export COREAUDIO_SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
+    # - name: set COREAUDIO_SDK_PATH
+    #   run: export COREAUDIO_SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
 
     - name: Build for visionOS target ${{matrix.target}}
       run: cargo +nightly build -Z build-std=std,panic_abort --verbose --target=${{matrix.target}}
