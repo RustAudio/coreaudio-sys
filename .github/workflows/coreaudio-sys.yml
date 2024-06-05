@@ -47,6 +47,33 @@ jobs:
     - name: Build for iOS target ${{matrix.target}}
       run: cargo build --verbose --target=${{matrix.target}}
 
+  visionos-check:
+    runs-on: macOS-14
+    strategy:
+      matrix:
+        toolchain: [stable, nightly]
+        target: [aarch64-apple-visionos, aarch64-apple-visionos-sim]
+    steps:
+    - uses: actions/checkout@v4
+    - uses: dtolnay/rust-toolchain@nightly
+      with:
+        profile: minimal
+        toolchain: ${{ matrix.toolchain }}
+        targets: ${{ matrix.target }}
+
+    - name: Install LLVM and Clang
+      uses: KyleMayes/install-llvm-action@v2.0.3
+      with:
+        # this is LLVM version that added support for visionOS
+        # https://github.com/llvm/llvm-project/pull/77707
+        version: "18.1.0" 
+
+    - name: add visionos targets
+      run: rustup target add ${{matrix.target}}
+
+    - name: Build for iOS target ${{matrix.target}}
+      run: cargo +nightly build -Zbuild-std,panic=abort --verbose --target=${{matrix.target}}
+
   # Build the docs with all features to make sure docs.rs will work.
   macos-docs:
     runs-on: macOS-latest

@@ -21,6 +21,10 @@ fn sdk_path(target: &str) -> Result<String, std::io::Error> {
         || target == "armv7s-apple-ios"
     {
         "iphoneos"
+    } else if target == "aarch64-apple-visionos" {
+        "xros"
+    } else if target == "aarch64-apple-visionos-sim" {
+        "xrsimulator"
     } else {
         unreachable!();
     };
@@ -45,11 +49,12 @@ fn build(sdk_path: Option<&str>, target: &str) {
     use std::env;
     use std::path::PathBuf;
 
+    #[allow(unused)]
     let mut headers: Vec<&'static str> = vec![];
 
     #[cfg(feature = "audio_unit")]
     {
-        // Since iOS 10.0 and macOS 10.12, all the functionality in AudioUnit
+        // Since iOS 10.0, macOS 10.12, visionOS 1.0, all the functionality in AudioUnit
         // moved to AudioToolbox, and the AudioUnit headers have been simple
         // wrappers ever since.
         if target.contains("apple-ios") {
@@ -61,7 +66,7 @@ fn build(sdk_path: Option<&str>, target: &str) {
             // On macOS, the symbols are present in the AudioToolbox framework,
             // but only on macOS 10.12 and above.
             //
-            // However, unlike on iOS, the AudioUnit framework on macOS
+            // However, unlike on iOS or visionOS, the AudioUnit framework on macOS
             // contains a dylib with the desired symbols, that we can link to
             // (in later versions just re-exports from AudioToolbox).
             println!("cargo:rustc-link-lib=framework=AudioUnit");
@@ -71,15 +76,17 @@ fn build(sdk_path: Option<&str>, target: &str) {
 
     #[cfg(feature = "audio_toolbox")]
     {
-        println!("cargo:rustc-link-lib=framework=AudioToolbox");
-        headers.push("AudioToolbox/AudioToolbox.h");
+        if !target.contains("apple-visionos") {
+            println!("cargo:rustc-link-lib=framework=AudioToolbox");
+            headers.push("AudioToolbox/AudioToolbox.h");
+        }
     }
 
     #[cfg(feature = "core_audio")]
     {
         println!("cargo:rustc-link-lib=framework=CoreAudio");
 
-        if target.contains("apple-ios") {
+        if target.contains("apple-ios") || target.contains("apple-visionos") {
             headers.push("CoreAudio/CoreAudioTypes.h");
         } else {
             headers.push("CoreAudio/CoreAudio.h");
@@ -100,14 +107,16 @@ fn build(sdk_path: Option<&str>, target: &str) {
 
     #[cfg(feature = "open_al")]
     {
-        println!("cargo:rustc-link-lib=framework=OpenAL");
-        headers.push("OpenAL/al.h");
-        headers.push("OpenAL/alc.h");
+        if !target.contains("visionos") {
+            println!("cargo:rustc-link-lib=framework=OpenAL");
+            headers.push("OpenAL/al.h");
+            headers.push("OpenAL/alc.h");
+        }
     }
 
     #[cfg(all(feature = "core_midi"))]
     {
-        if target.contains("apple-darwin") {
+        if target.contains("apple-darwin") && !target.contains("visionos") {
             println!("cargo:rustc-link-lib=framework=CoreMIDI");
             headers.push("CoreMIDI/CoreMIDI.h");
         }
@@ -125,6 +134,8 @@ fn build(sdk_path: Option<&str>, target: &str) {
     // -arch arm64 but it looks cleaner to just change the target.
     let target = if target == "aarch64-apple-ios" {
         "arm64-apple-ios"
+    } else if target == "aarch64-apple-visionos" {
+        "arm64-apple-visionos"
     } else if target == "aarch64-apple-darwin" {
         "arm64-apple-darwin"
     } else {
@@ -137,7 +148,7 @@ fn build(sdk_path: Option<&str>, target: &str) {
     if let Some(sdk_path) = sdk_path {
         builder = builder.clang_args(&["-isysroot", sdk_path]);
     }
-    if target.contains("apple-ios") {
+    if target.contains("apple-ios") || target.contains("apple-visionos") {
         // time.h as has a variable called timezone that conflicts with some of the objective-c
         // calls from NSCalendar.h in the Foundation framework. This removes that one variable.
         builder = builder.blocklist_item("timezone");
@@ -169,8 +180,8 @@ fn build(sdk_path: Option<&str>, target: &str) {
 
 fn main() {
     let target = std::env::var("TARGET").unwrap();
-    if !(target.contains("apple-darwin") || target.contains("apple-ios")) {
-        panic!("coreaudio-sys requires macos or ios target");
+    if !(target.contains("apple-darwin") || target.contains("apple-ios") || target.contains("apple-visionos")) {
+        panic!("coreaudio-sys requires macos or ios or visionos target");
     }
 
     let directory = sdk_path(&target).ok();
