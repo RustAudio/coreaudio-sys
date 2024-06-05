@@ -22,9 +22,11 @@ fn sdk_path(target: &str) -> Result<String, std::io::Error> {
     {
         "iphoneos"
     } else if target == "aarch64-apple-visionos" {
-        "xros"
+        // "xros"
+        "iphoneos" //xros doesn't have the AudioUnit header, but ios does
     } else if target == "aarch64-apple-visionos-sim" {
-        "xrsimulator"
+        // "xrsimulator"
+        "iphonesimulator" //xros doesn't have the AudioUnit header, but ios does
     } else {
         unreachable!();
     };
