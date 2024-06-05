@@ -34,9 +34,7 @@ jobs:
     - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: ${{ matrix.toolchain }}
-        targets: ${{ matrix.target }}
-        components: rust-src
-    # rustup component add rust-src --toolchain nightly-aarch64-apple-darwin
+        targets: ${{ matrix.target }}        
 
     - name: Install LLVM and Clang
       uses: KyleMayes/install-llvm-action@v2.0.3
@@ -63,6 +61,8 @@ jobs:
       with:
         profile: minimal
         toolchain: nightly
+        components: rust-src
+    # rustup component add rust-src --toolchain nightly-aarch64-apple-darwin
 
     - name: Install LLVM and Clang
       uses: KyleMayes/install-llvm-action@v2.0.3
