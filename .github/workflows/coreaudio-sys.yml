@@ -48,7 +48,7 @@ jobs:
       run: cargo build --verbose --target=${{matrix.target}}
 
   visionos-check:
-    runs-on: macOS-14
+    runs-on: macOS-latest
     strategy:
       matrix:
         target: [aarch64-apple-visionos, aarch64-apple-visionos-sim]
