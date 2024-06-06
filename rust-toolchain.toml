@@ -1,0 +1,5 @@
+[toolchain]
+channel = "nightly"
+# channel = "stable"
+components = ["rust-std", "rust-src", "rustc-dev", "llvm-tools-preview"]
+targets = ["aarch64-apple-vision-sim"]
