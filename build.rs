@@ -60,7 +60,7 @@ fn build(sdk_path: Option<&str>, target: &str) {
         // Since iOS 10.0, macOS 10.12, visionOS 1.0, all the functionality in AudioUnit
         // moved to AudioToolbox, and the AudioUnit headers have been simple
         // wrappers ever since.
-        if target.contains("apple-ios") || target.contains("apple-visionos") {
+        if target.contains("apple-ios"){
             // On iOS, the AudioUnit framework does not have (and never had) an
             // actual dylib to link to, it is just a few header files.
             // The AudioToolbox framework contains the symbols instead.
