@@ -6,10 +6,12 @@ jobs:
     runs-on: macOS-latest
     strategy:
       matrix:
-        # toolchain: [stable, nightly]
-        toolchain: [nightly]
+        toolchain: [stable, nightly]
+        # toolchain: [nightly]
     steps:
     - uses: actions/checkout@v4
+    - name: remove rust-toolchain.toml
+      run: rm -rf rust-toolchain.toml
     - name: Install LLVM and Clang
       uses: KyleMayes/install-llvm-action@v2.0.3
       with:
@@ -28,8 +30,8 @@ jobs:
     runs-on: macOS-14
     strategy:
       matrix:
-        # toolchain: [stable, nightly]
-        toolchain: [nightly]
+        toolchain: [stable, nightly]
+        # toolchain: [nightly]
         target: [aarch64-apple-ios, x86_64-apple-ios, aarch64-apple-ios-sim]
     steps:
     - uses: actions/checkout@v4
@@ -37,7 +39,8 @@ jobs:
       with:
         toolchain: ${{ matrix.toolchain }}
         targets: ${{ matrix.target }}
-
+    - name: remove rust-toolchain.toml
+      run: rm -rf rust-toolchain.toml
     - name: Install LLVM and Clang
       uses: KyleMayes/install-llvm-action@v2.0.3
       with:
