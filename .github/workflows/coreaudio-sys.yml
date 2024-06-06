@@ -64,16 +64,16 @@ jobs:
         components: rust-src
 
     - name: Install Xcode Command Line Tools
-      # run: sudo xcode-select --switch /Applications/Xcode_15.4.app/Contents/Developer
-      run: sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
+      run: sudo xcode-select --switch /Applications/Xcode_15.4.app/Contents/Developer
+      # run: sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
     
     # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-Readme.md
     - name: Show Xcode SDKs
       run: xcodebuild -showsdks
     
     - name: Find AudioUnit.h
-      # run: find /Applications/Xcode_15.4.app -name AudioUnit.h
-      run: find /Applications/Xcode.app -name AudioUnit.h
+      run: find /Applications/Xcode_15.4.app -name AudioUnit.h
+      # run: find /Applications/Xcode.app -name AudioUnit.h
 
     - name: Build for visionOS target ${{matrix.target}}
       # run: cargo build --verbose --target=${{matrix.target}}
