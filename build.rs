@@ -66,7 +66,7 @@ fn build(sdk_path: Option<&str>, target: &str) {
             // The AudioToolbox framework contains the symbols instead.
             println!("cargo:rustc-link-lib=framework=AudioToolbox");
             headers.push("AudioToolbox/AudioUnit.h");
-        } else if(!target.contains("apple-visionos")){
+        } else if !target.contains("apple-visionos") {
             // On macOS, the symbols are present in the AudioToolbox framework,
             // but only on macOS 10.12 and above.
             //
@@ -81,8 +81,10 @@ fn build(sdk_path: Option<&str>, target: &str) {
 
     #[cfg(feature = "audio_toolbox")]
     {
-        println!("cargo:rustc-link-lib=framework=AudioToolbox");
-        headers.push("AudioToolbox/AudioToolbox.h");
+        if !target.contains("apple-visionos") {
+            println!("cargo:rustc-link-lib=framework=AudioToolbox");
+            headers.push("AudioToolbox/AudioToolbox.h");
+        }
     }
 
     #[cfg(feature = "core_audio")]
