@@ -65,7 +65,7 @@ fn build(sdk_path: Option<&str>, target: &str) {
             // actual dylib to link to, it is just a few header files.
             // The AudioToolbox framework contains the symbols instead.
             println!("cargo:rustc-link-lib=framework=AudioToolbox");
-            headers.push("AudioToolbox/AudioUnit.h");
+            // headers.push("AudioToolbox/AudioUnit.h");
         } else {
             // On macOS, the symbols are present in the AudioToolbox framework,
             // but only on macOS 10.12 and above.
