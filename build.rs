@@ -183,6 +183,10 @@ fn build(sdk_path: Option<&str>, target: &str) {
 
     let contents = format!("{}{}", fixes.concat(), meta_header.concat());
 
+    println!("=============================");
+    println!("{}",&contents);
+    println!("=============================");
+
     builder = builder.header_contents("coreaudio.h", &contents);
 
     // Generate the bindings.
