@@ -138,7 +138,7 @@ fn build(sdk_path: Option<&str>, target: &str) {
     let target = if target == "aarch64-apple-ios" {
         "arm64-apple-ios"
     } else if target == "aarch64-apple-visionos" {
-        "arm64-apple-visionos"
+        "arm64-apple-xros"
     } else if target == "aarch64-apple-darwin" {
         "arm64-apple-darwin"
     } else {
