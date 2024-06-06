@@ -174,7 +174,6 @@ fn build(sdk_path: Option<&str>, target: &str) {
         .map(|h| format!("#include <{}>\n", h))
         .collect();
 
-    
     let fixes = if target.contains("apple-visionos") {
         vec![
             // /Applications/Xcode.app/Contents/Developer/Platforms/XROS.platform/Developer/SDKs/XROS1.1.sdk/System/Library/Frameworks/AudioToolbox.framework/Headers/AudioToolbox.h:43:11: fatal error: 'AudioToolbox/AudioFileComponent.h' file not found
@@ -182,16 +181,16 @@ fn build(sdk_path: Option<&str>, target: &str) {
             // https://github.com/phracker/MacOSX-SDKs/blob/master/MacOSX10.13.sdk/usr/include/MacTypes.h#L289
             // /Applications/Xcode.app/Contents/Developer/Platforms/XROS.platform/Developer/SDKs/XROS1.1.sdk/System/Library/Frameworks/CoreMIDI.framework/Headers/MIDIServices.h:1633:8: error: unknown type name 'ItemCount'
             "typedef unsigned long ItemCount;\n",
-            "typedef unsigned long ByteCount;\n"
+            "typedef unsigned long ByteCount;\n",
         ]
-    }else {
+    } else {
         vec![""]
     };
 
     let contents = format!("{}{}", fixes.concat(), meta_header.concat());
 
     println!("=============================");
-    println!("{}",&contents);
+    println!("{}", &contents);
     println!("=============================");
 
     builder = builder.header_contents("coreaudio.h", &contents);
@@ -209,7 +208,10 @@ fn build(sdk_path: Option<&str>, target: &str) {
 
 fn main() {
     let target = std::env::var("TARGET").unwrap();
-    if !(target.contains("apple-darwin") || target.contains("apple-ios") || target.contains("apple-visionos")) {
+    if !(target.contains("apple-darwin")
+        || target.contains("apple-ios")
+        || target.contains("apple-visionos"))
+    {
         panic!("coreaudio-sys requires macos or ios or visionos target");
     }
 
