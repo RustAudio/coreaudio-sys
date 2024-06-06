@@ -81,10 +81,8 @@ fn build(sdk_path: Option<&str>, target: &str) {
 
     #[cfg(feature = "audio_toolbox")]
     {
-        if !target.contains("apple-visionos") {
-            println!("cargo:rustc-link-lib=framework=AudioToolbox");
-            headers.push("AudioToolbox/AudioToolbox.h");
-        }
+        println!("cargo:rustc-link-lib=framework=AudioToolbox");
+        headers.push("AudioToolbox/AudioToolbox.h");
     }
 
     #[cfg(feature = "core_audio")]
