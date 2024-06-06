@@ -110,7 +110,7 @@ fn build(sdk_path: Option<&str>, target: &str) {
 
     #[cfg(feature = "open_al")]
     {
-        if !target.contains("visionos") {
+        if target.contains("ios") {
             println!("cargo:rustc-link-lib=framework=OpenAL");
             headers.push("OpenAL/al.h");
             headers.push("OpenAL/alc.h");
