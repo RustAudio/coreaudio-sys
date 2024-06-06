@@ -65,7 +65,7 @@ fn build(sdk_path: Option<&str>, target: &str) {
             // actual dylib to link to, it is just a few header files.
             // The AudioToolbox framework contains the symbols instead.
             println!("cargo:rustc-link-lib=framework=AudioToolbox");
-            // headers.push("AudioToolbox/AudioUnit.h");
+            headers.push("AudioToolbox/AudioUnit.h");
         } else {
             // On macOS, the symbols are present in the AudioToolbox framework,
             // but only on macOS 10.12 and above.
@@ -147,7 +147,7 @@ fn build(sdk_path: Option<&str>, target: &str) {
 
     builder = builder.clang_args(&[&format!("--target={}", target)]);
     // idea from https://github.com/RustAudio/coreaudio-sys/issues/23#issuecomment-507364379
-    builder = builder.clang_args(&["-I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/Kernel.framework", "-I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk//usr/include"]);
+    // builder = builder.clang_args(&["-I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/Kernel.framework", "-I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk//usr/include"]);
 
     if let Some(sdk_path) = sdk_path {
         builder = builder.clang_args(&["-isysroot", sdk_path]);
