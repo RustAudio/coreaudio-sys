@@ -6,7 +6,8 @@ jobs:
     runs-on: macOS-latest
     strategy:
       matrix:
-        toolchain: [stable, nightly]
+        # toolchain: [stable, nightly]
+        toolchain: [nightly]
     steps:
     - uses: actions/checkout@v4
     - name: Install LLVM and Clang
@@ -27,7 +28,8 @@ jobs:
     runs-on: macOS-14
     strategy:
       matrix:
-        toolchain: [stable, nightly]
+        # toolchain: [stable, nightly]
+        toolchain: [nightly]
         target: [aarch64-apple-ios, x86_64-apple-ios, aarch64-apple-ios-sim]
     steps:
     - uses: actions/checkout@v4
@@ -47,7 +49,7 @@ jobs:
     - name: Build for iOS target ${{matrix.target}}
       run: cargo build --verbose --target=${{matrix.target}}
 
-  visionos-check:
+  apple-tier-3-check: # TBD: watchOS, tvOS
     runs-on: macOS-latest
     strategy:
       matrix:
@@ -73,7 +75,8 @@ jobs:
       run: find /Applications/Xcode_15.4.app -name AudioUnit.h
 
     - name: Build for visionOS target ${{matrix.target}}
-      run: cargo +nightly build -Z build-std=std,panic_abort --verbose --target=${{matrix.target}}
+      run: cargo build --verbose --target=${{matrix.target}}
+      # run: cargo +nightly build -Z build-std=std,panic_abort --verbose --target=${{matrix.target}}
 
   # Build the docs with all features to make sure docs.rs will work.
   macos-docs:
@@ -86,7 +89,8 @@ jobs:
         version: "15.0"
     - uses: dtolnay/rust-toolchain@master
       with:
-        toolchain: stable
+        # toolchain: stable
+        toolchain: nightly
     - name: cargo doc - all features
       run: cargo doc --all-features --verbose
 
