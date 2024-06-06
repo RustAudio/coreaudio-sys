@@ -34,7 +34,7 @@ jobs:
     - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: ${{ matrix.toolchain }}
-        targets: ${{ matrix.target }}        
+        targets: ${{ matrix.target }}
 
     - name: Install LLVM and Clang
       uses: KyleMayes/install-llvm-action@v2.0.3
