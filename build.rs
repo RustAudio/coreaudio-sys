@@ -119,7 +119,7 @@ fn build(sdk_path: Option<&str>, target: &str) {
 
     #[cfg(all(feature = "core_midi"))]
     {
-        if target.contains("apple-darwin") && !target.contains("visionos") {
+        if target.contains("apple-darwin") {
             println!("cargo:rustc-link-lib=framework=CoreMIDI");
             headers.push("CoreMIDI/CoreMIDI.h");
         }
