@@ -60,13 +60,13 @@ fn build(sdk_path: Option<&str>, target: &str) {
         // Since iOS 10.0, macOS 10.12, visionOS 1.0, all the functionality in AudioUnit
         // moved to AudioToolbox, and the AudioUnit headers have been simple
         // wrappers ever since.
-        if target.contains("apple-ios") || target.contains("apple-visionos"){
+        if target.contains("apple-ios") {
             // On iOS, the AudioUnit framework does not have (and never had) an
             // actual dylib to link to, it is just a few header files.
             // The AudioToolbox framework contains the symbols instead.
             println!("cargo:rustc-link-lib=framework=AudioToolbox");
             headers.push("AudioToolbox/AudioUnit.h");
-        } else {
+        } else if(!target.contains("apple-visionos")){
             // On macOS, the symbols are present in the AudioToolbox framework,
             // but only on macOS 10.12 and above.
             //
