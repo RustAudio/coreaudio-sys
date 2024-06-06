@@ -91,16 +91,14 @@ fn build(sdk_path: Option<&str>, target: &str) {
     {
         println!("cargo:rustc-link-lib=framework=CoreAudio");
 
-        if !target.contains("apple-visionos") {
-            if target.contains("apple-ios") {
-                headers.push("CoreAudio/CoreAudioTypes.h");
-            } else {
-                headers.push("CoreAudio/CoreAudio.h");
+        if target.contains("apple-ios") || target.contains("apple-visionos") {
+            headers.push("CoreAudio/CoreAudioTypes.h");
+        } else {
+            headers.push("CoreAudio/CoreAudio.h");
 
-                #[cfg(feature = "audio_server_plugin")]
-                {
-                    headers.push("CoreAudio/AudioServerPlugIn.h");
-                }
+            #[cfg(feature = "audio_server_plugin")]
+            {
+                headers.push("CoreAudio/AudioServerPlugIn.h");
             }
         }
     }
