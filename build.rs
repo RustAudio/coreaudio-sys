@@ -8,22 +8,30 @@ fn sdk_path(target: &str) -> Result<String, std::io::Error> {
     }
 
     use std::process::Command;
+    let sdk = match target {
+        "aarch64-apple-darwin" | "x86_64-apple-darwin" => {
+            "macosx"
+        },
+        "x86_64-apple-ios" | "i386-apple-ios" | "aarch64-apple-ios-sim" => {
+            "iphonesimulator"
+        },
+        "aarch64-apple-ios" | "armv7-apple-ios" | "armv7s-apple-ios" => {
+            "iphoneos"
+        },
+        "aarch64-apple-visionos-sim" => "xrsimulator",
+        "aarch64-apple-visionos" => "xros",
 
-    let sdk = if target.contains("apple-darwin") {
-        "macosx"
-    } else if target == "x86_64-apple-ios"
-        || target == "i386-apple-ios"
-        || target == "aarch64-apple-ios-sim"
-    {
-        "iphonesimulator"
-    } else if target == "aarch64-apple-ios"
-        || target == "armv7-apple-ios"
-        || target == "armv7s-apple-ios"
-    {
-        "iphoneos"
-    } else {
-        unreachable!();
+        "aarch64-apple-tvos-sim" | "x86_64-apple-tvos" => "appletvsimulator",
+        "aarch64-apple-tvos" => "appletvos",
+
+        "aarch64-apple-watchos" | "armv7k-apple-watchos" | "arm64_32-apple-watchos" => "watchos",
+        "aarch64-apple-watchos-sim" | "x86_64-apple-watchos-sim" => "watchsimulator",
+
+        target => {
+            panic!("{} is not supported!", target);
+        }
     };
+
     let output = Command::new("xcrun")
         .args(&["--sdk", sdk, "--show-sdk-path"])
         .output()?
@@ -52,12 +60,7 @@ fn build(sdk_path: Option<&str>, target: &str) {
         // Since iOS 10.0 and macOS 10.12, all the functionality in AudioUnit
         // moved to AudioToolbox, and the AudioUnit headers have been simple
         // wrappers ever since.
-        if target.contains("apple-ios") {
-            // On iOS, the AudioUnit framework does not have (and never had) an
-            // actual dylib to link to, it is just a few header files.
-            // The AudioToolbox framework contains the symbols instead.
-            println!("cargo:rustc-link-lib=framework=AudioToolbox");
-        } else {
+        if target.contains("apple-darwin") {
             // On macOS, the symbols are present in the AudioToolbox framework,
             // but only on macOS 10.12 and above.
             //
@@ -65,29 +68,37 @@ fn build(sdk_path: Option<&str>, target: &str) {
             // contains a dylib with the desired symbols, that we can link to
             // (in later versions just re-exports from AudioToolbox).
             println!("cargo:rustc-link-lib=framework=AudioUnit");
+            headers.push("AudioUnit/AudioUnit.h");
+        } else if !target.contains("apple-watchos") {
+            // On iOS, the AudioUnit framework does not have (and never had) an
+            // actual dylib to link to, it is just a few header files.
+            // The AudioToolbox framework contains the symbols instead.
+            println!("cargo:rustc-link-lib=framework=AudioToolbox");
+            headers.push("AudioUnit/AudioUnit.h");
         }
-        headers.push("AudioUnit/AudioUnit.h");
     }
 
     #[cfg(feature = "audio_toolbox")]
     {
         println!("cargo:rustc-link-lib=framework=AudioToolbox");
-        headers.push("AudioToolbox/AudioToolbox.h");
+        if !target.contains("apple-watchos") {
+            headers.push("AudioToolbox/AudioToolbox.h");
+        }
     }
 
     #[cfg(feature = "core_audio")]
     {
         println!("cargo:rustc-link-lib=framework=CoreAudio");
 
-        if target.contains("apple-ios") {
-            headers.push("CoreAudio/CoreAudioTypes.h");
-        } else {
+        if target.contains("apple-darwin") {
             headers.push("CoreAudio/CoreAudio.h");
 
             #[cfg(feature = "audio_server_plugin")]
             {
                 headers.push("CoreAudio/AudioServerPlugIn.h");
             }
+        } else {
+            headers.push("CoreAudio/CoreAudioTypes.h");
         }
     }
 
@@ -100,9 +111,11 @@ fn build(sdk_path: Option<&str>, target: &str) {
 
     #[cfg(feature = "open_al")]
     {
-        println!("cargo:rustc-link-lib=framework=OpenAL");
-        headers.push("OpenAL/al.h");
-        headers.push("OpenAL/alc.h");
+        if target.contains("apple-tvos") || target.contains("apple-ios") || target.contains("apple-darwin") {
+            println!("cargo:rustc-link-lib=framework=OpenAL");
+            headers.push("OpenAL/al.h");
+            headers.push("OpenAL/alc.h");
+        }
     }
 
     #[cfg(all(feature = "core_midi"))]
@@ -123,21 +136,23 @@ fn build(sdk_path: Option<&str>, target: &str) {
     // See https://github.com/rust-lang/rust-bindgen/issues/1211
     // Technically according to the llvm mailing list, the argument to clang here should be
     // -arch arm64 but it looks cleaner to just change the target.
-    let target = if target == "aarch64-apple-ios" {
-        "arm64-apple-ios"
-    } else if target == "aarch64-apple-darwin" {
-        "arm64-apple-darwin"
-    } else {
-        target
+    // The full list of clang targtes may be:
+    // https://github.com/llvm/llvm-project/blob/7476c20c481cbccbdb89139fb94620e083015932/llvm/include/llvm/BinaryFormat/MachO.def#L123-L138
+    let clang_target = match target {
+        "aarch64-apple-ios" => "arm64-apple-ios",
+        "aarch64-apple-visionos" => "arm64-apple-xros",
+        "aarch64-apple-visionos-sim" => "aarch64-apple-xros-simulator",
+        "aarch64-apple-darwin"  => "arm64-apple-darwin",
+        target => target,
     };
     builder = builder.size_t_is_usize(true);
 
-    builder = builder.clang_args(&[&format!("--target={}", target)]);
+    builder = builder.clang_args(&[&format!("--target={}", clang_target)]);
 
     if let Some(sdk_path) = sdk_path {
         builder = builder.clang_args(&["-isysroot", sdk_path]);
     }
-    if target.contains("apple-ios") {
+    if !target.contains("apple-darwin") {
         // time.h as has a variable called timezone that conflicts with some of the objective-c
         // calls from NSCalendar.h in the Foundation framework. This removes that one variable.
         builder = builder.blocklist_item("timezone");
@@ -159,7 +174,7 @@ fn build(sdk_path: Option<&str>, target: &str) {
     // Generate the bindings.
     builder = builder.trust_clang_mangling(false).derive_default(true);
 
-    let bindings = builder.generate().expect("unable to generate bindings");
+    let bindings = builder.generate().expect(format!("unable to generate bindings for {target}").as_str());
 
     // Write them to the crate root.
     bindings
@@ -169,8 +184,8 @@ fn build(sdk_path: Option<&str>, target: &str) {
 
 fn main() {
     let target = std::env::var("TARGET").unwrap();
-    if !(target.contains("apple-darwin") || target.contains("apple-ios")) {
-        panic!("coreaudio-sys requires macos or ios target");
+    if !target.contains("apple") {
+        panic!("coreaudio-sys requires an apple target.");
     }
 
     let directory = sdk_path(&target).ok();
