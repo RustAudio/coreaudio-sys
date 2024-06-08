@@ -80,6 +80,7 @@ fn build(sdk_path: Option<&str>, target: &str) {
     {
         println!("cargo:rustc-link-lib=framework=AudioToolbox");
         headers.push("AudioToolbox/AudioToolbox.h");
+        headers.push("AudioToolbox/AudioSession.h");
     }
 
     #[cfg(feature = "core_audio")]
