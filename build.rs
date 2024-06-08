@@ -134,14 +134,12 @@ fn build(sdk_path: Option<&str>, target: &str) {
     // See https://github.com/rust-lang/rust-bindgen/issues/1211
     // Technically according to the llvm mailing list, the argument to clang here should be
     // -arch arm64 but it looks cleaner to just change the target.
-    let clang_target = if target.starts_with("aarch64-apple-ios") {
-        "arm64-apple-ios"
-    } else if target.starts_with("aarch64-apple-visionos") {
-        "arm64-apple-xros"
-    } else if target.starts_with("aarch64-apple-darwin") {
-        "arm64-apple-darwin"
-    } else {
-        target
+    let clang_target = match target {
+        "aarch64-apple-ios" => "arm64-apple-ios",
+        "aarch64-apple-visionos" => "arm64-apple-xros",
+        "aarch64-apple-visionos-sim" => "arm64-apple-xros-sim",
+        "aarch64-apple-darwin" => "arm64-apple-darwin",
+        _ => target
     };
     builder = builder.size_t_is_usize(true);
 
