@@ -60,7 +60,7 @@ fn build(sdk_path: Option<&str>, target: &str) {
         // Since iOS 10.0, macOS 10.12, visionOS 1.0, all the functionality in AudioUnit
         // moved to AudioToolbox, and the AudioUnit headers have been simple
         // wrappers ever since.
-        if target.contains("apple-ios") || target.contains("apple-visionos"){
+        if target.contains("apple-ios") || target.contains("apple-visionos") {
             // On iOS, the AudioUnit framework does not have (and never had) an
             // actual dylib to link to, it is just a few header files.
             // The AudioToolbox framework contains the symbols instead.
@@ -76,7 +76,6 @@ fn build(sdk_path: Option<&str>, target: &str) {
             println!("cargo:rustc-link-lib=framework=AudioUnit");
             headers.push("AudioUnit/AudioUnit.h");
         }
-        // headers.push("AudioUnit/AudioUnit.h");
     }
 
     #[cfg(feature = "audio_toolbox")]
@@ -103,9 +102,10 @@ fn build(sdk_path: Option<&str>, target: &str) {
 
     #[cfg(feature = "io_kit_audio")]
     {
-        assert!(target.contains("apple-darwin"));
-        println!("cargo:rustc-link-lib=framework=IOKit");
-        headers.push("IOKit/audio/IOAudioTypes.h");
+        if target.contains("apple-darwin") {
+            println!("cargo:rustc-link-lib=framework=IOKit");
+            headers.push("IOKit/audio/IOAudioTypes.h");
+        }
     }
 
     #[cfg(feature = "open_al")]
@@ -119,7 +119,7 @@ fn build(sdk_path: Option<&str>, target: &str) {
 
     #[cfg(all(feature = "core_midi"))]
     {
-        if target.contains("apple-darwin") {
+        if target.contains("apple-darwin") || target.contains("apple-visionos") {
             println!("cargo:rustc-link-lib=framework=CoreMIDI");
             headers.push("CoreMIDI/CoreMIDI.h");
         }
@@ -135,7 +135,7 @@ fn build(sdk_path: Option<&str>, target: &str) {
     // See https://github.com/rust-lang/rust-bindgen/issues/1211
     // Technically according to the llvm mailing list, the argument to clang here should be
     // -arch arm64 but it looks cleaner to just change the target.
-    let target = if target.starts_with("aarch64-apple-ios") {
+    let clang_target = if target.starts_with("aarch64-apple-ios") {
         "arm64-apple-ios"
     } else if target.starts_with("aarch64-apple-visionos") {
         "arm64-apple-xros"
@@ -146,9 +146,7 @@ fn build(sdk_path: Option<&str>, target: &str) {
     };
     builder = builder.size_t_is_usize(true);
 
-    builder = builder.clang_args(&[&format!("--target={}", target)]);
-    // idea from https://github.com/RustAudio/coreaudio-sys/issues/23#issuecomment-507364379
-    // builder = builder.clang_args(&["-I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/Kernel.framework", "-I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk//usr/include"]);
+    builder = builder.clang_args(&[&format!("--target={}", clang_target)]);
 
     if let Some(sdk_path) = sdk_path {
         builder = builder.clang_args(&["-isysroot", sdk_path]);
@@ -165,29 +163,27 @@ fn build(sdk_path: Option<&str>, target: &str) {
     // https://github.com/rust-lang/rust-bindgen/issues/1651
     builder = builder.layout_tests(false);
 
-    let meta_header: Vec<_> = headers
-        .iter()
-        .map(|h| format!("#include <{}>\n", h))
-        .collect();
-
-    let fixes = if target.contains("apple-visionos") {
-        vec![
-            // /Applications/Xcode.app/Contents/Developer/Platforms/XROS.platform/Developer/SDKs/XROS1.1.sdk/System/Library/Frameworks/AudioToolbox.framework/Headers/AudioToolbox.h:43:11: fatal error: 'AudioToolbox/AudioFileComponent.h' file not found
-            "#define TARGET_OS_IPHONE true\n",
-            // https://github.com/phracker/MacOSX-SDKs/blob/master/MacOSX10.13.sdk/usr/include/MacTypes.h#L289
-            // /Applications/Xcode.app/Contents/Developer/Platforms/XROS.platform/Developer/SDKs/XROS1.1.sdk/System/Library/Frameworks/CoreMIDI.framework/Headers/MIDIServices.h:1633:8: error: unknown type name 'ItemCount'
-            "typedef unsigned long ItemCount;\n",
-            "typedef unsigned long ByteCount;\n",
-        ]
-    } else {
-        vec![""]
+    if target.contains("apple-visionos") {
+        // /Applications/Xcode.app/Contents/Developer/Platforms/XROS.platform/Developer/SDKs/XROS1.1.sdk/System/Library/Frameworks/AudioToolbox.framework/Headers/AudioToolbox.h:43:11: fatal error: 'AudioToolbox/AudioFileComponent.h' file not found
+        headers.insert(0, "#define TARGET_OS_IPHONE 1");
+        // https://github.com/phracker/MacOSX-SDKs/blob/master/MacOSX10.13.sdk/usr/include/MacTypes.h#L289
+        // /Applications/Xcode.app/Contents/Developer/Platforms/XROS.platform/Developer/SDKs/XROS1.1.sdk/System/Library/Frameworks/CoreMIDI.framework/Headers/MIDIServices.h:1633:8: error: unknown type name 'ItemCount'
+        headers.insert(0, "typedef unsigned long ItemCount;");
+        headers.insert(0, "typedef unsigned long ByteCount;");
     };
 
-    let contents = format!("{}{}", fixes.concat(), meta_header.concat());
+    let meta_header: Vec<_> = headers
+        .iter()
+        .map(|h| {
+            if h.ends_with(".h") {
+                format!("#include <{}>\n", h)
+            } else {
+                format!("{}\n", h)
+            }
+        })
+        .collect();
 
-    println!("=============================");
-    println!("{}", &contents);
-    println!("=============================");
+    let contents = meta_header.concat();
 
     builder = builder.header_contents("coreaudio.h", &contents);
 
