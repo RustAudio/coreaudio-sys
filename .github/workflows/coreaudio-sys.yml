@@ -7,8 +7,11 @@ jobs:
     strategy:
       matrix:
         toolchain: [stable, nightly]
+        # toolchain: [nightly]
     steps:
     - uses: actions/checkout@v4
+    - name: remove rust-toolchain.toml
+      run: rm -rf rust-toolchain.toml
     - name: Install LLVM and Clang
       uses: KyleMayes/install-llvm-action@v2.0.3
       with:
@@ -28,6 +31,7 @@ jobs:
     strategy:
       matrix:
         toolchain: [stable, nightly]
+        # toolchain: [nightly]
         target: [aarch64-apple-ios, x86_64-apple-ios, aarch64-apple-ios-sim]
     steps:
     - uses: actions/checkout@v4
@@ -35,7 +39,8 @@ jobs:
       with:
         toolchain: ${{ matrix.toolchain }}
         targets: ${{ matrix.target }}
-
+    - name: remove rust-toolchain.toml
+      run: rm -rf rust-toolchain.toml
     - name: Install LLVM and Clang
       uses: KyleMayes/install-llvm-action@v2.0.3
       with:
@@ -46,6 +51,36 @@ jobs:
 
     - name: Build for iOS target ${{matrix.target}}
       run: cargo build --verbose --target=${{matrix.target}}
+
+  apple-tier-3-check: # TBD: watchOS, tvOS
+    runs-on: macOS-latest
+    strategy:
+      matrix:
+        target: [aarch64-apple-visionos, aarch64-apple-visionos-sim]
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: dtolnay/rust-toolchain@master
+      with:
+        profile: minimal
+        toolchain: nightly
+        components: rust-src
+
+    - name: Install Xcode Command Line Tools
+      run: sudo xcode-select --switch /Applications/Xcode_15.4.app/Contents/Developer
+      # run: sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
+    
+    # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-Readme.md
+    - name: Show Xcode SDKs
+      run: xcodebuild -showsdks
+    
+    - name: Find AudioUnit.h
+      run: find /Applications/Xcode_15.4.app -name AudioUnit.h
+      # run: find /Applications/Xcode.app -name AudioUnit.h
+
+    - name: Build for visionOS target ${{matrix.target}}
+      # run: cargo build --verbose --target=${{matrix.target}}
+      run: cargo +nightly build -Z build-std=std,panic_abort --verbose --target=${{matrix.target}}
 
   # Build the docs with all features to make sure docs.rs will work.
   macos-docs:
@@ -58,7 +93,8 @@ jobs:
         version: "15.0"
     - uses: dtolnay/rust-toolchain@master
       with:
-        toolchain: stable
+        # toolchain: stable
+        toolchain: nightly
     - name: cargo doc - all features
       run: cargo doc --all-features --verbose
 
