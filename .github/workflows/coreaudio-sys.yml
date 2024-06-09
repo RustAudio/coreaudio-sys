@@ -61,7 +61,7 @@ jobs:
           x86_64-apple-watchos-sim,
           aarch64-apple-tvos,
           aarch64-apple-tvos-sim,
-          x86_64-apple-tvos-sim,
+          x86_64-apple-tvos,
         ]
     steps:
     - uses: actions/checkout@v4
