@@ -39,6 +39,36 @@ jobs:
     - name: Build for iOS target ${{matrix.target}}
       run: cargo build --verbose --target=${{matrix.target}}
 
+  apple-tier-3-check:
+    runs-on: macOS-14
+    strategy:
+      matrix:
+        target: [
+          aarch64-apple-visionos,
+          aarch64-apple-visionos-sim,
+          aarch64-apple-watchos,
+          arm64_32-apple-watchos,
+          armv7k-apple-watchos,
+          aarch64-apple-watchos-sim,
+          x86_64-apple-watchos-sim,
+          aarch64-apple-tvos,
+          aarch64-apple-tvos-sim,
+          x86_64-apple-tvos,
+        ]
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: nightly
+        components: rust-src
+
+    - name: Install Xcode Command Line Tools
+      run: sudo xcode-select --switch /Applications/Xcode_15.4.app/Contents/Developer
+
+    - name: Build for visionOS target ${{matrix.target}}
+      run: cargo +nightly build -Z build-std --target=${{matrix.target}}
+
   # Build the docs with all features to make sure docs.rs will work.
   macos-docs:
     runs-on: macOS-latest
