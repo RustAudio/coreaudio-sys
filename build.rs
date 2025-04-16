@@ -14,6 +14,7 @@ fn sdk_path(target: &str) -> Result<String, std::io::Error> {
     } else if target == "x86_64-apple-ios"
         || target == "i386-apple-ios"
         || target == "aarch64-apple-ios-sim"
+        || target == "x86_64-apple-ios-sim"
     {
         "iphonesimulator"
     } else if target == "aarch64-apple-ios"
@@ -127,6 +128,10 @@ fn build(sdk_path: Option<&str>, target: &str) {
         "arm64-apple-ios"
     } else if target == "aarch64-apple-darwin" {
         "arm64-apple-darwin"
+    } else if target == "aarch64-apple-ios-sim" {
+        "arm64-apple-ios-simulator"
+    } else if target == "x86_64-apple-ios-sim" {
+        "x86_64-apple-ios-simulator"
     } else {
         target
     };
