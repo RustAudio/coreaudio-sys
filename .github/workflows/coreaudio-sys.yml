@@ -8,7 +8,7 @@ jobs:
       matrix:
         toolchain: [stable, nightly]
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: ${{ matrix.toolchain }}
@@ -26,7 +26,7 @@ jobs:
         toolchain: [stable, nightly]
         target: [aarch64-apple-ios, x86_64-apple-ios, aarch64-apple-ios-sim]
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: ${{ matrix.toolchain }}
@@ -43,7 +43,7 @@ jobs:
   macos-docs:
     runs-on: macOS-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: stable
@@ -58,7 +58,7 @@ jobs:
       CRATESIO_TOKEN: ${{ secrets.CRATESIO_TOKEN }}
     runs-on: macOS-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: stable
