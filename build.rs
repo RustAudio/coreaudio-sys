@@ -145,7 +145,7 @@ fn build(sdk_path: Option<&str>, target: &str) {
     builder = builder.header_contents("coreaudio.h", &meta_header.concat());
 
     // Generate the bindings.
-    builder = builder.trust_clang_mangling(false).derive_default(true);
+    builder = builder.trust_clang_mangling(true).derive_default(true);
 
     let bindings = builder.generate().expect("unable to generate bindings");
 
