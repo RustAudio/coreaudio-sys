@@ -12,7 +12,7 @@ build = "build.rs"
 edition = "2024"
 
 [build-dependencies.bindgen]
-version = "0.72"
+version = "0.73"
 default-features = false
 features = ["runtime"]
 
